@@ -59,3 +59,15 @@ variable "lambda_runtime" {
   type        = string
   default     = "nodejs22.x"
 }
+
+variable "sendgrid_api_key" {
+  description = "SendGrid API Key for email services"
+  type        = string
+  sensitive   = true
+}
+
+variable "sendgrid_from_email" {
+  description = "SendGrid sender email address"
+  type        = string
+  sensitive   = true
+}

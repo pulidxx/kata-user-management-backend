@@ -1,14 +1,16 @@
 locals {
   lambda_env_vars = {
-    DB_HOST     = aws_db_instance.postgres.address
-    DB_PORT     = tostring(aws_db_instance.postgres.port)
-    DB_NAME     = var.db_name
-    DB_USERNAME = var.db_username
-    DB_PASSWORD = var.db_password
-    DB_SSL      = "true"
-    DB_SYNC     = "false"
-    NODE_ENV    = "production"
-    JWT_SECRET  = var.jwt_secret
+    DB_HOST              = aws_db_instance.postgres.address
+    DB_PORT              = tostring(aws_db_instance.postgres.port)
+    DB_NAME              = var.db_name
+    DB_USERNAME          = var.db_username
+    DB_PASSWORD          = var.db_password
+    DB_SSL               = "true"
+    DB_SYNC              = "false"
+    NODE_ENV             = "production"
+    JWT_SECRET           = var.jwt_secret
+    SENDGRID_API_KEY     = var.sendgrid_api_key
+    SENDGRID_FROM_EMAIL  = var.sendgrid_from_email
   }
 }
 
