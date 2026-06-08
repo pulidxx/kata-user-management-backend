@@ -13,12 +13,15 @@ import {
   ClientQueryDto,
 } from "../dtos/client.dtos";
 import { errors } from "../../../utils";
+import { EmailService } from "../../../utils";
 
 export class ClientService {
   private clientRepository: ClientRepository;
+  private emailService: EmailService;
 
   constructor() {
     this.clientRepository = new ClientRepository();
+    this.emailService = new EmailService();
   }
 
   private toClientResponse(client: Client): ClientResponseDto {
@@ -109,6 +112,12 @@ export class ClientService {
       ownerId: user.id,
     });
 
+    this.emailService
+      .sendClientCreated(client)
+      .catch((err) =>
+        console.error("Error al enviar email de creación de cliente:", err),
+      );
+
     return this.toClientResponse(client);
   }
 
@@ -145,6 +154,14 @@ export class ClientService {
       throw errors.notFound("Cliente");
     }
 
+    if (dto.status && dto.status !== client.status) {
+      this.emailService
+        .sendClientStatusChanged(updatedClient, client.status)
+        .catch((err) =>
+          console.error("Error al enviar email de cambio de estado:", err),
+        );
+    }
+
     return this.toClientResponse(updatedClient);
   }
 
@@ -169,6 +186,12 @@ export class ClientService {
       throw errors.notFound("Cliente");
     }
 
+    this.emailService
+      .sendClientStatusChanged(updatedClient, client.status)
+      .catch((err) =>
+        console.error("Error al enviar email de cambio de estado:", err),
+      );
+
     return {
       id: updatedClient.id,
       status: updatedClient.status,
@@ -190,6 +213,12 @@ export class ClientService {
     if (!deleted) {
       throw errors.notFound("Cliente");
     }
+
+    this.emailService
+      .sendClientDeleted(client)
+      .catch((err) =>
+        console.error("Error al enviar email de eliminación de cliente:", err),
+      );
   }
 
   async exportClients(
