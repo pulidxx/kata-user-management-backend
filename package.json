@@ -17,8 +17,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/aws-lambda": "^8.10.145",
     "@types/bcryptjs": "^2.4.6",
-    "@types/uuid": "^10.0.0",
+    "@types/uuid": "^9.0.8",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -27,8 +28,9 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
+    "serverless-http": "^3.2.0",
     "typeorm": "^0.3.21",
-    "uuid": "^14.0.0",
+    "uuid": "^9.0.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

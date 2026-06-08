@@ -41,7 +41,7 @@ export class UserController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const dto: UpdateUserDto = req.body;
       const result = await this.userService.updateUser(id, dto);
       res.status(200).json(result);
@@ -55,7 +55,7 @@ export class UserController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const dto: ChangeRoleDto = req.body;
       const result = await this.userService.changeRole(id, dto, req.user!.id);
       res.status(200).json(result);
@@ -69,7 +69,7 @@ export class UserController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { reassignTo, deleteClients } = req.query;
 
       const options: { reassignTo?: string; deleteClients?: boolean } = {};

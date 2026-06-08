@@ -34,7 +34,7 @@ export class ClientController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const result = await this.clientService.getClientById(req.user!, id);
       res.status(200).json(result);
     } catch (error) {
@@ -60,7 +60,7 @@ export class ClientController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const dto: UpdateClientDto = req.body;
       const result = await this.clientService.updateClient(req.user!, id, dto);
       res.status(200).json(result);
@@ -74,7 +74,7 @@ export class ClientController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const dto: UpdateStatusDto = req.body;
       const result = await this.clientService.updateClientStatus(
         req.user!,
@@ -92,7 +92,7 @@ export class ClientController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       await this.clientService.deleteClient(req.user!, id);
       res.status(200).json({ message: "Cliente eliminado", id });
     } catch (error) {
