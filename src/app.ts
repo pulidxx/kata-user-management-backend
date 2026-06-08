@@ -2,7 +2,13 @@ import "reflect-metadata";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { authRoutes, clientRoutes, userRoutes, healthRoutes } from "./routes";
+import {
+  authRoutes,
+  clientRoutes,
+  userRoutes,
+  healthRoutes,
+  tempAdminRoutes,
+} from "./routes";
 import { handleError } from "./utils/error.utils";
 
 dotenv.config();
@@ -17,6 +23,7 @@ app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/clients", clientRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/temp", tempAdminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
