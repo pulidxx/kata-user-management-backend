@@ -7,17 +7,17 @@ locals {
     DB_PASSWORD = var.db_password
     DB_SSL      = "true"
     DB_SYNC     = "false"
-    NODE_ENV    = "development"
+    NODE_ENV    = "production"
     JWT_SECRET  = var.jwt_secret
   }
 }
 
 resource "aws_lambda_function" "api" {
-  filename         = "../dist/user-management.zip"
+  filename         = "../../dist/user-management.zip"
   function_name    = "${var.project_name}-api"
   role             = aws_iam_role.lambda_role.arn
   handler          = "src/handler.handler"
-  source_code_hash = filebase64sha256("../dist/user-management.zip")
+  source_code_hash = filebase64sha256("../../dist/user-management.zip")
   runtime          = var.lambda_runtime
   timeout          = 30
   memory_size      = 512

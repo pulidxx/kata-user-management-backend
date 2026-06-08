@@ -60,25 +60,25 @@ jobs:
         run: |
           rm -f .terraform.lock.hcl
           terraform init -upgrade
-        working-directory: terraform
+        working-directory: deploy/iac-qa
 
       - name: Terraform Format Check
         run: terraform fmt -check
-        working-directory: terraform
+        working-directory: deploy/iac-qa
         continue-on-error: true
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: terraform
+        working-directory: deploy/iac-qa
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-        working-directory: terraform
+        working-directory: deploy/iac-qa
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-        working-directory: terraform
+        working-directory: deploy/iac-qa
 
       - name: Output API URL
         run: terraform output api_gateway_url
-        working-directory: terraform
+        working-directory: deploy/iac-qa
