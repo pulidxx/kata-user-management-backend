@@ -1,0 +1,1032 @@
+openapi: 3.0.3
+info:
+  title: User Management Backend API
+  description: API for managing users and clients with role-based access control
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://api-qa.example.com/api/v1
+    description: QA environment
+  - url: https://api.example.com/api/v1
+    description: Production environment
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Auth
+    description: Authentication and authorization endpoints
+  - name: Users
+    description: User management endpoints (Admin only)
+  - name: Clients
+    description: Client management endpoints
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API and database are available
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Create a new user account
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: Authenticate user and receive access and refresh tokens
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      description: Get a new access token using a refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      tags:
+        - Auth
+      summary: Get current user
+      description: Get the authenticated user's information
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout
+      description: Invalidate the current user's refresh token
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Sesión cerrada correctamente
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Retrieve a list of all users (Admin only)
+      operationId: getAllUsers
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags:
+        - Users
+      summary: Create a new user
+      description: Create a new user account (Admin only)
+      operationId: createUser
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/{id}:
+    put:
+      tags:
+        - Users
+      summary: Update a user
+      description: Update user information (Admin only)
+      operationId: updateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Users
+      summary: Delete a user
+      description: Delete a user account (Admin only)
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Usuario eliminado correctamente
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/{id}/role:
+    patch:
+      tags:
+        - Users
+      summary: Change user role
+      description: Update a user's role (Admin only)
+      operationId: changeUserRole
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeRoleRequest"
+      responses:
+        "200":
+          description: Role updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /clients:
+    get:
+      tags:
+        - Clients
+      summary: Get all clients
+      description: Retrieve a paginated list of clients with optional filtering
+      operationId: getAllClients
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by client status
+          schema:
+            $ref: "#/components/schemas/ClientStatus"
+        - name: search
+          in: query
+          description: Search by name, email, document number
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number (starts at 1)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Clients retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientsListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags:
+        - Clients
+      summary: Create a new client
+      description: Create a new client (Admin or Asesor only)
+      operationId: createClient
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientRequest"
+      responses:
+        "201":
+          description: Client created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Client with same document already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /clients/export:
+    get:
+      tags:
+        - Clients
+      summary: Export clients
+      description: Export all clients data (Admin or Asesor only)
+      operationId: exportClients
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Clients exported successfully
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /clients/{id}:
+    get:
+      tags:
+        - Clients
+      summary: Get client by ID
+      description: Retrieve a specific client by ID
+      operationId: getClientById
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ClientId"
+      responses:
+        "200":
+          description: Client retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags:
+        - Clients
+      summary: Update a client
+      description: Update client information
+      operationId: updateClient
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ClientId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClientRequest"
+      responses:
+        "200":
+          description: Client updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Clients
+      summary: Delete a client
+      description: Soft delete a client (marks as deleted)
+      operationId: deleteClient
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ClientId"
+      responses:
+        "200":
+          description: Client deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cliente eliminado correctamente
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /clients/{id}/status:
+    patch:
+      tags:
+        - Clients
+      summary: Update client status
+      description: Update only the status of a client
+      operationId: updateClientStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ClientId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusRequest"
+      responses:
+        "200":
+          description: Client status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from login or register endpoints
+
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: User ID (UUID)
+      schema:
+        type: string
+        format: uuid
+
+    ClientId:
+      name: id
+      in: path
+      required: true
+      description: Client ID (UUID)
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # Enums
+    UserRole:
+      type: string
+      enum:
+        - admin
+        - asesor
+        - consulta
+      description: |
+        User roles:
+        * `admin` - Full access to all features
+        * `asesor` - Can manage clients
+        * `consulta` - Read-only access
+
+    DocumentType:
+      type: string
+      enum:
+        - CC
+        - CE
+        - TI
+        - PAS
+        - NIT
+      description: |
+        Document types:
+        * `CC` - Cédula de Ciudadanía
+        * `CE` - Cédula de Extranjería
+        * `TI` - Tarjeta de Identidad
+        * `PAS` - Pasaporte
+        * `NIT` - Número de Identificación Tributaria
+
+    ClientStatus:
+      type: string
+      enum:
+        - Contactado
+        - En Validación
+        - Activo
+        - Inactivo
+        - Rechazado
+
+    # Health
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-06-09T10:30:00.000Z"
+        database:
+          type: string
+          enum:
+            - connected
+            - disconnected
+          example: connected
+      required:
+        - status
+        - timestamp
+        - database
+
+    # Auth requests
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          example: Juan Pérez
+        email:
+          type: string
+          format: email
+          example: juan.perez@example.com
+        password:
+          type: string
+          minLength: 8
+          description: Must contain at least one uppercase letter, one number, and one special character
+          example: SecurePass123!
+      required:
+        - name
+        - email
+        - password
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: juan.perez@example.com
+        password:
+          type: string
+          example: SecurePass123!
+      required:
+        - email
+        - password
+
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - refreshToken
+
+    # Auth responses
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Juan Pérez
+        email:
+          type: string
+          format: email
+          example: juan.perez@example.com
+        role:
+          $ref: "#/components/schemas/UserRole"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00.000Z"
+      required:
+        - id
+        - name
+        - email
+        - role
+        - createdAt
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - user
+        - accessToken
+        - refreshToken
+
+    # User requests
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          example: María García
+        email:
+          type: string
+          format: email
+          example: maria.garcia@example.com
+        password:
+          type: string
+          minLength: 8
+          description: Must contain at least one uppercase letter, one number, and one special character
+          example: SecurePass123!
+        role:
+          $ref: "#/components/schemas/UserRole"
+      required:
+        - name
+        - email
+        - password
+        - role
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          example: María García
+        email:
+          type: string
+          format: email
+          example: maria.garcia@example.com
+        password:
+          type: string
+          minLength: 8
+          description: Must contain at least one uppercase letter, one number, and one special character
+          example: NewSecurePass123!
+        role:
+          $ref: "#/components/schemas/UserRole"
+      description: All fields are optional. Only provided fields will be updated.
+
+    ChangeRoleRequest:
+      type: object
+      properties:
+        role:
+          $ref: "#/components/schemas/UserRole"
+      required:
+        - role
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+      required:
+        - users
+
+    # Client requests
+    CreateClientRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          example: Carlos Rodríguez
+        documentType:
+          $ref: "#/components/schemas/DocumentType"
+        documentNumber:
+          type: string
+          pattern: "^[0-9]+$"
+          example: "1234567890"
+        email:
+          type: string
+          format: email
+          example: carlos.rodriguez@example.com
+        phone:
+          type: string
+          minLength: 10
+          example: "3001234567"
+        city:
+          type: string
+          minLength: 1
+          example: Bogotá
+        address:
+          type: string
+          minLength: 1
+          example: Calle 123 #45-67
+        birthDate:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Birth date in YYYY-MM-DD format (cannot be future date)
+          example: "1990-05-15"
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+      required:
+        - fullName
+        - documentType
+        - documentNumber
+        - email
+        - phone
+        - city
+        - address
+        - birthDate
+        - status
+
+    UpdateClientRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 1
+          example: Carlos Rodríguez
+        documentType:
+          $ref: "#/components/schemas/DocumentType"
+        documentNumber:
+          type: string
+          pattern: "^[0-9]+$"
+          example: "1234567890"
+        email:
+          type: string
+          format: email
+          example: carlos.rodriguez@example.com
+        phone:
+          type: string
+          minLength: 10
+          example: "3001234567"
+        city:
+          type: string
+          minLength: 1
+          example: Bogotá
+        address:
+          type: string
+          minLength: 1
+          example: Calle 123 #45-67
+        birthDate:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Birth date in YYYY-MM-DD format (cannot be future date)
+          example: "1990-05-15"
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+      description: All fields are optional. Only provided fields will be updated.
+
+    UpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+      required:
+        - status
+
+    # Client responses
+    ClientResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 660e8400-e29b-41d4-a716-446655440000
+        fullName:
+          type: string
+          example: Carlos Rodríguez
+        documentType:
+          $ref: "#/components/schemas/DocumentType"
+        documentNumber:
+          type: string
+          example: "1234567890"
+        email:
+          type: string
+          format: email
+          example: carlos.rodriguez@example.com
+        phone:
+          type: string
+          example: "3001234567"
+        city:
+          type: string
+          example: Bogotá
+        address:
+          type: string
+          example: Calle 123 #45-67
+        birthDate:
+          type: string
+          format: date
+          example: "1990-05-15"
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+        ownerId:
+          type: string
+          format: uuid
+          nullable: true
+          example: 550e8400-e29b-41d4-a716-446655440000
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00.000Z"
+      required:
+        - id
+        - fullName
+        - documentType
+        - documentNumber
+        - email
+        - phone
+        - city
+        - address
+        - birthDate
+        - status
+        - ownerId
+        - createdAt
+        - updatedAt
+
+    ClientsListResponse:
+      type: object
+      properties:
+        clients:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientResponse"
+        total:
+          type: integer
+          description: Total number of clients matching the filters
+          example: 150
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Number of items per page
+          example: 20
+      required:
+        - clients
+        - total
+        - page
+        - limit
+
+    # Error responses
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Error message
+            code:
+              type: string
+              example: ERROR_CODE
+            status:
+              type: integer
+              example: 400
+          required:
+            - message
+            - code
+            - status
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              message: Validation error
+              code: VALIDATION_ERROR
+              status: 400
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              message: Token no válido o expirado
+              code: UNAUTHORIZED
+              status: 401
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              message: No tiene permisos para realizar esta acción
+              code: FORBIDDEN
+              status: 403
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              message: Recurso no encontrado
+              code: NOT_FOUND
+              status: 404
