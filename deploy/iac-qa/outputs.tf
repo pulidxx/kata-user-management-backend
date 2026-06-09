@@ -1,9 +1,9 @@
 output "api_gateway_url" {
-  description = "API Gateway endpoint URL"
-  value       = aws_apigatewayv2_api.main.api_endpoint
+  description = "HTTP API Gateway endpoint URL for application access"
+  value       = aws_apigatewayv2_api.http_api.api_endpoint
 }
 
 output "database_endpoint" {
-  description = "RDS database endpoint"
-  value       = aws_db_instance.postgres.address
+  description = "PostgreSQL database connection endpoint"
+  value       = aws_db_instance.postgresql_db.address
 }

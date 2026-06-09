@@ -21,7 +21,7 @@ router.put("/:id", validateBody(updateUserSchema), userController.updateUser);
 router.patch(
   "/:id/role",
   validateBody(changeRoleSchema),
-  userController.changeRole,
+  userController.changeRole
 );
 
 router.delete("/:id", userController.deleteUser);

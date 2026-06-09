@@ -1,50 +1,132 @@
-name: Deploy to AWS with Terraform
+name: QA Pipeline
 
 on:
   push:
     branches:
-      - QA
+      - qa
 
 jobs:
-  deploy:
+  quality:
+    name: Code Quality
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Clone repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
 
-      - name: Cache node modules
+      - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-npm-
 
-      - name: Install dependencies
+      - name: Install packages
         run: npm ci
 
-      - name: Build project (TypeScript)
+      - name: Check code format
+        run: npm run format:check
+
+      - name: Run linter
+        run: npm run lint
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Execute test suite
+        run: npm run test:coverage
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Compile TypeScript
         run: npm run build
 
-      - name: Install production dependencies only
+      - name: Prepare production dependencies
         run: npm ci --production
 
-      - name: Package Lambda function
+      - name: Create deployment package
         run: |
           cp -r node_modules dist/
           cp package.json dist/
-
           cd dist
           zip -r user-management.zip . -x "*.map"
           cd ..
 
-      - name: Configure AWS credentials
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-package
+          path: dist/user-management.zip
+          retention-days: 1
+
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    needs: build
+    environment: qa
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-package
+          path: dist/
+
+      - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -56,35 +138,35 @@ jobs:
         with:
           terraform_version: 1.10.3
 
-      - name: Terraform Init
+      - name: Initialize infrastructure
         run: |
           rm -f .terraform.lock.hcl
           terraform init -upgrade
         working-directory: deploy/iac-qa
 
-      - name: Terraform Format Check
+      - name: Format check
         run: terraform fmt -check
         working-directory: deploy/iac-qa
         continue-on-error: true
 
-      - name: Terraform Validate
+      - name: Validate configuration
         run: terraform validate
         working-directory: deploy/iac-qa
 
-      - name: Terraform Plan
+      - name: Plan changes
         run: terraform plan -out=tfplan
         working-directory: deploy/iac-qa
         env:
           TF_VAR_sendgrid_api_key: ${{ secrets.TF_VAR_SENDGRID_API_KEY }}
           TF_VAR_sendgrid_from_email: ${{ secrets.TF_VAR_SENDGRID_FROM_EMAIL }}
 
-      - name: Terraform Apply
+      - name: Apply infrastructure
         run: terraform apply -auto-approve tfplan
         working-directory: deploy/iac-qa
         env:
           TF_VAR_sendgrid_api_key: ${{ secrets.TF_VAR_SENDGRID_API_KEY }}
           TF_VAR_sendgrid_from_email: ${{ secrets.TF_VAR_SENDGRID_FROM_EMAIL }}
 
-      - name: Output API URL
+      - name: Display API endpoint
         run: terraform output api_gateway_url
         working-directory: deploy/iac-qa

@@ -17,7 +17,7 @@ router.post("/login", validateBody(loginSchema), authController.login);
 router.post(
   "/refresh",
   validateBody(refreshTokenSchema),
-  authController.refreshToken,
+  authController.refreshToken
 );
 
 router.get("/me", authMiddleware, authController.me);

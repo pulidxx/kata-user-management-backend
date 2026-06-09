@@ -1,13 +1,14 @@
-resource "aws_db_subnet_group" "main" {
+resource "aws_db_subnet_group" "database_subnet_group" {
   name       = "${var.project_name}-db-subnet-group"
-  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+  subnet_ids = [aws_subnet.private_subnet_az1.id, aws_subnet.private_subnet_az2.id]
 
   tags = {
-    Name = "${var.project_name}-db-subnet-group"
+    Name        = "${var.project_name}-db-subnet-group"
+    Environment = "production"
   }
 }
 
-resource "aws_db_instance" "postgres" {
+resource "aws_db_instance" "postgresql_db" {
   identifier             = "${var.project_name}-db"
   engine                 = "postgres"
   engine_version         = "17.4"
@@ -17,12 +18,14 @@ resource "aws_db_instance" "postgres" {
   db_name                = var.db_name
   username               = var.db_username
   password               = var.db_password
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [aws_security_group.database.id]
+  db_subnet_group_name   = aws_db_subnet_group.database_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
   publicly_accessible    = false
   skip_final_snapshot    = true
 
   tags = {
-    Name = "${var.project_name}-db"
+    Name        = "${var.project_name}-db"
+    Engine      = "PostgreSQL"
+    Environment = "production"
   }
 }

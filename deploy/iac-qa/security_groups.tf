@@ -1,31 +1,34 @@
-resource "aws_security_group" "lambda" {
+resource "aws_security_group" "function_sg" {
   name        = "${var.project_name}-lambda-sg"
-  description = "Security group for Lambda functions"
-  vpc_id      = aws_vpc.main.id
+  description = "Controls network access for Lambda compute functions"
+  vpc_id      = aws_vpc.app_network.id
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
   }
 
   tags = {
-    Name = "${var.project_name}-lambda-sg"
+    Name        = "${var.project_name}-lambda-sg"
+    Service     = "Lambda"
+    Environment = "qa"
   }
 }
 
-resource "aws_security_group" "database" {
+resource "aws_security_group" "db_sg" {
   name        = "${var.project_name}-db-sg"
-  description = "Security group for RDS PostgreSQL"
-  vpc_id      = aws_vpc.main.id
+  description = "Controls database access for PostgreSQL RDS instance"
+  vpc_id      = aws_vpc.app_network.id
 
   ingress {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda.id]
-    description     = "Allow PostgreSQL from Lambda"
+    security_groups = [aws_security_group.function_sg.id]
+    description     = "PostgreSQL access from Lambda functions"
   }
 
   egress {
@@ -33,9 +36,12 @@ resource "aws_security_group" "database" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
   }
 
   tags = {
-    Name = "${var.project_name}-db-sg"
+    Name        = "${var.project_name}-db-sg"
+    Service     = "RDS"
+    Environment = "qa"
   }
 }

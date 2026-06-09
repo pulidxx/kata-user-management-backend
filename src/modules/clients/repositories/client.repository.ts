@@ -1,4 +1,4 @@
-import { Repository, ILike, In } from "typeorm";
+import { Repository, In } from "typeorm";
 import { AppDataSource } from "../../../ormconfig";
 import { Client, ClientStatus, DocumentType } from "../../../entities";
 
@@ -26,7 +26,7 @@ export class ClientRepository {
   }
 
   async findAll(
-    options: ClientQueryOptions,
+    options: ClientQueryOptions
   ): Promise<{ clients: Client[]; total: number }> {
     const queryBuilder = this.repository
       .createQueryBuilder("client")
@@ -56,7 +56,7 @@ export class ClientRepository {
     if (options.search) {
       queryBuilder.andWhere(
         "(client.fullName ILIKE :search OR client.email ILIKE :search OR client.documentNumber ILIKE :search)",
-        { search: `%${options.search}%` },
+        { search: `%${options.search}%` }
       );
     }
 
@@ -74,7 +74,7 @@ export class ClientRepository {
   }
 
   async findAllForExport(
-    options: Omit<ClientQueryOptions, "page" | "limit">,
+    options: Omit<ClientQueryOptions, "page" | "limit">
   ): Promise<Client[]> {
     const queryBuilder = this.repository
       .createQueryBuilder("client")
@@ -104,7 +104,7 @@ export class ClientRepository {
     if (options.search) {
       queryBuilder.andWhere(
         "(client.fullName ILIKE :search OR client.email ILIKE :search OR client.documentNumber ILIKE :search)",
-        { search: `%${options.search}%` },
+        { search: `%${options.search}%` }
       );
     }
 
@@ -118,7 +118,7 @@ export class ClientRepository {
 
   async update(
     id: string,
-    clientData: Partial<Client>,
+    clientData: Partial<Client>
   ): Promise<Client | null> {
     await this.repository.update(id, clientData);
     return this.findById(id);
@@ -132,7 +132,7 @@ export class ClientRepository {
   async existsByDocument(
     documentType: DocumentType,
     documentNumber: string,
-    excludeId?: string,
+    excludeId?: string
   ): Promise<boolean> {
     const queryBuilder = this.repository
       .createQueryBuilder("client")

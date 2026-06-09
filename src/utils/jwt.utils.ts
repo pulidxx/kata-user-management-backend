@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import { JwtPayload, TokenPair } from "../types";
+import { JwtPayload } from "../types";
 import { UserRole } from "../entities";
 
 const ACCESS_TOKEN_EXPIRY = "15m";

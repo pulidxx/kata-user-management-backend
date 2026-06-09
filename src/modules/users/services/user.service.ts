@@ -1,4 +1,4 @@
-import { User, UserRole } from "../../../entities";
+import { User } from "../../../entities";
 import { UserRepository } from "../repositories/user.repository";
 import { ClientRepository } from "../../clients/repositories/client.repository";
 import {
@@ -58,7 +58,7 @@ export class UserService {
 
   async updateUser(
     userId: string,
-    dto: UpdateUserDto,
+    dto: UpdateUserDto
   ): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
@@ -93,7 +93,7 @@ export class UserService {
   async changeRole(
     userId: string,
     dto: ChangeRoleDto,
-    requestingUserId: string,
+    requestingUserId: string
   ): Promise<UserResponseDto> {
     if (userId === requestingUserId) {
       throw errors.validation("No puedes cambiar tu propio rol");
@@ -117,7 +117,7 @@ export class UserService {
   async deleteUser(
     userId: string,
     requestingUserId: string,
-    options?: { reassignTo?: string; deleteClients?: boolean },
+    options?: { reassignTo?: string; deleteClients?: boolean }
   ): Promise<{
     message: string;
     id: string;
@@ -138,13 +138,13 @@ export class UserService {
     if (clientCount > 0) {
       if (!options?.reassignTo && !options?.deleteClients) {
         throw errors.validation(
-          "El usuario tiene clientes asignados. Debe reasignarlos o eliminarlos.",
+          "El usuario tiene clientes asignados. Debe reasignarlos o eliminarlos."
         );
       }
 
       if (options.reassignTo) {
         const targetUser = await this.userRepository.findById(
-          options.reassignTo,
+          options.reassignTo
         );
         if (!targetUser) {
           throw errors.notFound("Usuario de reasignación");
@@ -152,13 +152,13 @@ export class UserService {
 
         if (targetUser.role === "consulta") {
           throw errors.validation(
-            "No se puede reasignar a un usuario de consulta.",
+            "No se puede reasignar a un usuario de consulta."
           );
         }
 
         const reassignedCount = await this.clientRepository.updateOwner(
           userId,
-          options.reassignTo,
+          options.reassignTo
         );
 
         const deleted = await this.userRepository.delete(userId);

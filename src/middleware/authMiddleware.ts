@@ -8,7 +8,7 @@ const userRepository = new UserRepository();
 export const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const authHeader = req.header("Authorization");
