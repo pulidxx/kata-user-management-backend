@@ -10,7 +10,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "start": "node dist/src/server.js",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
