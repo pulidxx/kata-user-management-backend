@@ -1,126 +1,142 @@
-resource "aws_vpc" "main" {
+resource "aws_vpc" "app_network" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.project_name}-vpc"
+    Name        = "${var.project_name}-vpc"
+    Environment = "production"
   }
 }
 
-resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.app_network.id
 
   tags = {
-    Name = "${var.project_name}-igw"
+    Name        = "${var.project_name}-igw"
+    Environment = "production"
   }
 }
 
-resource "aws_subnet" "public_1" {
-  vpc_id                  = aws_vpc.main.id
+resource "aws_subnet" "public_subnet_az1" {
+  vpc_id                  = aws_vpc.app_network.id
   cidr_block              = "10.0.10.0/24"
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet-1"
+    Name        = "${var.project_name}-public-subnet-1"
+    Tier        = "public"
+    Environment = "production"
   }
 }
 
-resource "aws_subnet" "public_2" {
-  vpc_id                  = aws_vpc.main.id
+resource "aws_subnet" "public_subnet_az2" {
+  vpc_id                  = aws_vpc.app_network.id
   cidr_block              = "10.0.11.0/24"
   availability_zone       = data.aws_availability_zones.available.names[1]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet-2"
+    Name        = "${var.project_name}-public-subnet-2"
+    Tier        = "public"
+    Environment = "production"
   }
 }
 
-resource "aws_subnet" "private_1" {
-  vpc_id            = aws_vpc.main.id
+resource "aws_subnet" "private_subnet_az1" {
+  vpc_id            = aws_vpc.app_network.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
-    Name = "${var.project_name}-private-subnet-1"
+    Name        = "${var.project_name}-private-subnet-1"
+    Tier        = "private"
+    Environment = "production"
   }
 }
 
-resource "aws_subnet" "private_2" {
-  vpc_id            = aws_vpc.main.id
+resource "aws_subnet" "private_subnet_az2" {
+  vpc_id            = aws_vpc.app_network.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    Name = "${var.project_name}-private-subnet-2"
+    Name        = "${var.project_name}-private-subnet-2"
+    Tier        = "private"
+    Environment = "production"
   }
 }
 
-resource "aws_eip" "nat" {
+resource "aws_eip" "nat_gateway_eip" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.project_name}-nat-eip"
+    Name        = "${var.project_name}-nat-eip"
+    Environment = "production"
   }
 
-  depends_on = [aws_internet_gateway.main]
+  depends_on = [aws_internet_gateway.igw]
 }
 
-resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public_1.id
+resource "aws_nat_gateway" "nat_gw" {
+  allocation_id = aws_eip.nat_gateway_eip.id
+  subnet_id     = aws_subnet.public_subnet_az1.id
 
   tags = {
-    Name = "${var.project_name}-nat-gateway"
+    Name        = "${var.project_name}-nat-gateway"
+    Environment = "production"
   }
 
-  depends_on = [aws_internet_gateway.main]
+  depends_on = [aws_internet_gateway.igw]
 }
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.app_network.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
+    gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = {
-    Name = "${var.project_name}-public-rt"
+    Name        = "${var.project_name}-public-rt"
+    Tier        = "public"
+    Environment = "production"
   }
 }
 
-resource "aws_route_table_association" "public_1" {
-  subnet_id      = aws_subnet.public_1.id
-  route_table_id = aws_route_table.public.id
+resource "aws_route_table_association" "public_rt_assoc_az1" {
+  subnet_id      = aws_subnet.public_subnet_az1.id
+  route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_route_table_association" "public_2" {
-  subnet_id      = aws_subnet.public_2.id
-  route_table_id = aws_route_table.public.id
+resource "aws_route_table_association" "public_rt_assoc_az2" {
+  subnet_id      = aws_subnet.public_subnet_az2.id
+  route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.app_network.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
+    nat_gateway_id = aws_nat_gateway.nat_gw.id
   }
 
   tags = {
-    Name = "${var.project_name}-private-rt"
+    Name        = "${var.project_name}-private-rt"
+    Tier        = "private"
+    Environment = "production"
   }
 }
 
-resource "aws_route_table_association" "private_1" {
-  subnet_id      = aws_subnet.private_1.id
-  route_table_id = aws_route_table.private.id
+resource "aws_route_table_association" "private_rt_assoc_az1" {
+  subnet_id      = aws_subnet.private_subnet_az1.id
+  route_table_id = aws_route_table.private_rt.id
 }
 
-resource "aws_route_table_association" "private_2" {
-  subnet_id      = aws_subnet.private_2.id
-  route_table_id = aws_route_table.private.id
+resource "aws_route_table_association" "private_rt_assoc_az2" {
+  subnet_id      = aws_subnet.private_subnet_az2.id
+  route_table_id = aws_route_table.private_rt.id
 }
