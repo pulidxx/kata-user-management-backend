@@ -18,7 +18,7 @@ export class ClientController {
 
   getAllClients = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const query = req.query as unknown as ClientQueryDto;
@@ -31,7 +31,7 @@ export class ClientController {
 
   getClientById = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -44,7 +44,7 @@ export class ClientController {
 
   createClient = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const dto: CreateClientDto = req.body;
@@ -57,7 +57,7 @@ export class ClientController {
 
   updateClient = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -71,7 +71,7 @@ export class ClientController {
 
   updateClientStatus = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -79,7 +79,7 @@ export class ClientController {
       const result = await this.clientService.updateClientStatus(
         req.user!,
         id,
-        dto,
+        dto
       );
       res.status(200).json(result);
     } catch (error) {
@@ -89,7 +89,7 @@ export class ClientController {
 
   deleteClient = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -102,7 +102,7 @@ export class ClientController {
 
   exportClients = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const query = req.query as unknown as Omit<

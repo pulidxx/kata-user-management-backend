@@ -21,7 +21,7 @@ router.use(authMiddleware);
 router.get(
   "/",
   validateQuery(clientQuerySchema),
-  clientController.getAllClients,
+  clientController.getAllClients
 );
 
 router.get("/export", requireAdminOrAsesor, clientController.exportClients);
@@ -32,19 +32,19 @@ router.post(
   "/",
   requireAdminOrAsesor,
   validateBody(createClientSchema),
-  clientController.createClient,
+  clientController.createClient
 );
 
 router.put(
   "/:id",
   validateBody(updateClientSchema),
-  clientController.updateClient,
+  clientController.updateClient
 );
 
 router.patch(
   "/:id/status",
   validateBody(updateStatusSchema),
-  clientController.updateClientStatus,
+  clientController.updateClientStatus
 );
 
 router.delete("/:id", clientController.deleteClient);

@@ -7,7 +7,7 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
   return (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ): void => {
     try {
       if (!req.user) {

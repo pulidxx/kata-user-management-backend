@@ -1,5 +1,5 @@
 import { Parser } from "json2csv";
-import { Client, User, UserRole } from "../../../entities";
+import { Client, User } from "../../../entities";
 import {
   ClientRepository,
   ClientQueryOptions,
@@ -44,7 +44,7 @@ export class ClientService {
 
   private getQueryOptionsForUser(
     user: User,
-    query: ClientQueryDto,
+    query: ClientQueryDto
   ): ClientQueryOptions {
     const options: ClientQueryOptions = {
       status: query.status,
@@ -62,7 +62,7 @@ export class ClientService {
 
   async getAllClients(
     user: User,
-    query: ClientQueryDto,
+    query: ClientQueryDto
   ): Promise<ClientsListResponseDto> {
     const options = this.getQueryOptionsForUser(user, query);
     const { clients, total } = await this.clientRepository.findAll(options);
@@ -77,7 +77,7 @@ export class ClientService {
 
   async getClientById(
     user: User,
-    clientId: string,
+    clientId: string
   ): Promise<ClientResponseDto> {
     const client = await this.clientRepository.findById(clientId);
     if (!client) {
@@ -93,7 +93,7 @@ export class ClientService {
 
   async createClient(
     user: User,
-    dto: CreateClientDto,
+    dto: CreateClientDto
   ): Promise<ClientResponseDto> {
     if (user.role === "consulta") {
       throw errors.forbidden();
@@ -101,7 +101,7 @@ export class ClientService {
 
     const documentExists = await this.clientRepository.existsByDocument(
       dto.documentType,
-      dto.documentNumber,
+      dto.documentNumber
     );
     if (documentExists) {
       throw errors.documentExists();
@@ -115,7 +115,7 @@ export class ClientService {
     this.emailService
       .sendClientCreated(client)
       .catch((err) =>
-        console.error("Error al enviar email de creación de cliente:", err),
+        console.error("Error al enviar email de creación de cliente:", err)
       );
 
     return this.toClientResponse(client);
@@ -124,7 +124,7 @@ export class ClientService {
   async updateClient(
     user: User,
     clientId: string,
-    dto: UpdateClientDto,
+    dto: UpdateClientDto
   ): Promise<ClientResponseDto> {
     const client = await this.clientRepository.findById(clientId);
     if (!client) {
@@ -142,7 +142,7 @@ export class ClientService {
       const documentExists = await this.clientRepository.existsByDocument(
         docType,
         docNumber,
-        clientId,
+        clientId
       );
       if (documentExists) {
         throw errors.documentExists();
@@ -158,7 +158,7 @@ export class ClientService {
       this.emailService
         .sendClientStatusChanged(updatedClient, client.status)
         .catch((err) =>
-          console.error("Error al enviar email de cambio de estado:", err),
+          console.error("Error al enviar email de cambio de estado:", err)
         );
     }
 
@@ -168,7 +168,7 @@ export class ClientService {
   async updateClientStatus(
     user: User,
     clientId: string,
-    dto: UpdateStatusDto,
+    dto: UpdateStatusDto
   ): Promise<{ id: string; status: string; updatedAt: string }> {
     const client = await this.clientRepository.findById(clientId);
     if (!client) {
@@ -189,7 +189,7 @@ export class ClientService {
     this.emailService
       .sendClientStatusChanged(updatedClient, client.status)
       .catch((err) =>
-        console.error("Error al enviar email de cambio de estado:", err),
+        console.error("Error al enviar email de cambio de estado:", err)
       );
 
     return {
@@ -217,13 +217,13 @@ export class ClientService {
     this.emailService
       .sendClientDeleted(client)
       .catch((err) =>
-        console.error("Error al enviar email de eliminación de cliente:", err),
+        console.error("Error al enviar email de eliminación de cliente:", err)
       );
   }
 
   async exportClients(
     user: User,
-    query: Omit<ClientQueryDto, "page" | "limit">,
+    query: Omit<ClientQueryDto, "page" | "limit">
   ): Promise<string> {
     if (user.role === "consulta") {
       throw errors.forbidden();

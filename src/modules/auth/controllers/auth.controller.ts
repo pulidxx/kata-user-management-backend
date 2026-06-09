@@ -44,15 +44,13 @@ export class AuthController {
   me = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       if (!req.user) {
-        res
-          .status(401)
-          .json({
-            error: {
-              message: "No autenticado",
-              code: "UNAUTHORIZED",
-              status: 401,
-            },
-          });
+        res.status(401).json({
+          error: {
+            message: "No autenticado",
+            code: "UNAUTHORIZED",
+            status: 401,
+          },
+        });
         return;
       }
       const user = await this.authService.getCurrentUser(req.user.id);
@@ -65,15 +63,13 @@ export class AuthController {
   logout = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       if (!req.user) {
-        res
-          .status(401)
-          .json({
-            error: {
-              message: "No autenticado",
-              code: "UNAUTHORIZED",
-              status: 401,
-            },
-          });
+        res.status(401).json({
+          error: {
+            message: "No autenticado",
+            code: "UNAUTHORIZED",
+            status: 401,
+          },
+        });
         return;
       }
       await this.authService.logout(req.user.id);

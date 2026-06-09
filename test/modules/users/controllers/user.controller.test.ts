@@ -1,5 +1,5 @@
-import { UserController } from '../../../../src/modules/users/controllers/user.controller';
-import { buildMockResponse, sampleUser } from '../../../test-helpers';
+import { UserController } from "../../../../src/modules/users/controllers/user.controller";
+import { buildMockResponse, sampleUser } from "../../../test-helpers";
 
 const userServiceMock = {
   getAllUsers: jest.fn(),
@@ -9,18 +9,18 @@ const userServiceMock = {
   deleteUser: jest.fn(),
 };
 
-jest.mock('../../../../src/modules/users/services/user.service', () => ({
+jest.mock("../../../../src/modules/users/services/user.service", () => ({
   UserService: jest.fn(() => userServiceMock),
 }));
 
-describe('UserController', () => {
+describe("UserController", () => {
   const controller = new UserController();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('getAllUsers responde con la lista del servicio', async () => {
+  it("getAllUsers responde con la lista del servicio", async () => {
     const res = buildMockResponse();
     userServiceMock.getAllUsers.mockResolvedValue({ users: [sampleUser()] });
 
@@ -30,19 +30,26 @@ describe('UserController', () => {
     expect(res.json).toHaveBeenCalledWith({ users: [sampleUser()] });
   });
 
-  it('deleteUser usa el id autenticado como requestingUserId', async () => {
+  it("deleteUser usa el id autenticado como requestingUserId", async () => {
     const res = buildMockResponse();
-    userServiceMock.deleteUser.mockResolvedValue({ message: 'Usuario eliminado', id: 'user-1' });
+    userServiceMock.deleteUser.mockResolvedValue({
+      message: "Usuario eliminado",
+      id: "user-1",
+    });
 
     await controller.deleteUser(
       {
-        params: { id: 'user-1' },
+        params: { id: "user-1" },
         query: {},
-        user: sampleUser({ id: 'requesting-user' }),
+        user: sampleUser({ id: "requesting-user" }),
       } as never,
-      res as never,
+      res as never
     );
 
-    expect(userServiceMock.deleteUser).toHaveBeenCalledWith('user-1', 'requesting-user', {});
+    expect(userServiceMock.deleteUser).toHaveBeenCalledWith(
+      "user-1",
+      "requesting-user",
+      {}
+    );
   });
 });
