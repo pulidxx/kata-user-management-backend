@@ -8,7 +8,7 @@ export class AppError extends Error {
     public message: string,
     public code: string,
     public statusCode: number,
-    public details?: Record<string, string>,
+    public details?: Record<string, string>
   ) {
     super(message);
     this.name = "AppError";
@@ -19,7 +19,7 @@ export const createErrorResponse = (
   message: string,
   code: string,
   status: number,
-  details?: Record<string, string>,
+  details?: Record<string, string>
 ): ApiErrorResponse => ({
   error: {
     message,
@@ -38,8 +38,8 @@ export const handleError = (error: unknown, res: Response): Response => {
           error.message,
           error.code,
           error.statusCode,
-          error.details,
-        ),
+          error.details
+        )
       );
   }
 
@@ -58,8 +58,8 @@ export const handleError = (error: unknown, res: Response): Response => {
           firstError.message,
           "VALIDATION_ERROR",
           400,
-          details,
-        ),
+          details
+        )
       );
   }
 
@@ -79,8 +79,8 @@ export const handleError = (error: unknown, res: Response): Response => {
             createErrorResponse(
               "Ya existe un cliente con este tipo y número de documento.",
               "CONFLICT",
-              409,
-            ),
+              409
+            )
           );
       }
 
@@ -94,8 +94,8 @@ export const handleError = (error: unknown, res: Response): Response => {
             createErrorResponse(
               "Ya existe una cuenta con este correo.",
               "CONFLICT",
-              409,
-            ),
+              409
+            )
           );
       }
 
@@ -105,8 +105,8 @@ export const handleError = (error: unknown, res: Response): Response => {
           createErrorResponse(
             "Ya existe un registro con estos datos.",
             "CONFLICT",
-            409,
-          ),
+            409
+          )
         );
     }
 
@@ -118,8 +118,8 @@ export const handleError = (error: unknown, res: Response): Response => {
             createErrorResponse(
               "El usuario tiene clientes asignados. Debe reasignarlos o eliminarlos.",
               "VALIDATION_ERROR",
-              400,
-            ),
+              400
+            )
           );
       }
 
@@ -129,8 +129,8 @@ export const handleError = (error: unknown, res: Response): Response => {
           createErrorResponse(
             "No se puede eliminar porque existen registros relacionados.",
             "VALIDATION_ERROR",
-            400,
-          ),
+            400
+          )
         );
     }
 
@@ -138,11 +138,7 @@ export const handleError = (error: unknown, res: Response): Response => {
     return res
       .status(500)
       .json(
-        createErrorResponse(
-          "Error en la base de datos.",
-          "DATABASE_ERROR",
-          500,
-        ),
+        createErrorResponse("Error en la base de datos.", "DATABASE_ERROR", 500)
       );
   }
 
@@ -150,7 +146,7 @@ export const handleError = (error: unknown, res: Response): Response => {
   return res
     .status(500)
     .json(
-      createErrorResponse("Error interno del servidor", "INTERNAL_ERROR", 500),
+      createErrorResponse("Error interno del servidor", "INTERNAL_ERROR", 500)
     );
 };
 
@@ -177,13 +173,13 @@ export const errors = {
     new AppError(
       "Ya existe un cliente con este tipo y número de documento.",
       "CONFLICT",
-      409,
+      409
     ),
 
   rateLimitExceeded: () =>
     new AppError(
       "Demasiados intentos. Por favor, espera unos minutos.",
       "RATE_LIMIT_EXCEEDED",
-      429,
+      429
     ),
 };

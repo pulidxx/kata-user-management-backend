@@ -28,7 +28,10 @@ export const AppDataSource = new DataSource({
   ssl:
     process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
   synchronize: process.env.NODE_ENV !== "production",
-  logging: process.env.NODE_ENV === "development" ? ["error", "warn", "migration"] : false,
+  logging:
+    process.env.NODE_ENV === "development"
+      ? ["error", "warn", "migration"]
+      : false,
   entities: [User, Client, RefreshToken],
   migrations: ["src/migrations/**/*.ts"],
   subscribers: ["src/subscribers/**/*.ts"],

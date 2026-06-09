@@ -13,7 +13,7 @@ export class UserController {
 
   getAllUsers = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const result = await this.userService.getAllUsers();
@@ -25,7 +25,7 @@ export class UserController {
 
   createUser = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const dto: CreateUserDto = req.body;
@@ -38,7 +38,7 @@ export class UserController {
 
   updateUser = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -52,7 +52,7 @@ export class UserController {
 
   changeRole = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -66,7 +66,7 @@ export class UserController {
 
   deleteUser = async (
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> => {
     try {
       const id = req.params.id as string;
@@ -83,7 +83,7 @@ export class UserController {
       const result = await this.userService.deleteUser(
         id,
         req.user!.id,
-        options,
+        options
       );
       res.status(200).json(result);
     } catch (error) {

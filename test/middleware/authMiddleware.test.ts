@@ -1,15 +1,15 @@
-import { buildMockNext, buildMockResponse, sampleUser } from '../test-helpers';
+import { buildMockNext, buildMockResponse, sampleUser } from "../test-helpers";
 
 const mockUserRepository = {
   findById: jest.fn(),
 };
 
-jest.mock('../../src/modules/users/repositories/user.repository', () => ({
+jest.mock("../../src/modules/users/repositories/user.repository", () => ({
   UserRepository: jest.fn(() => mockUserRepository),
 }));
 
-jest.mock('../../src/utils', () => {
-  const actual = jest.requireActual('../../src/utils');
+jest.mock("../../src/utils", () => {
+  const actual = jest.requireActual("../../src/utils");
 
   return {
     ...actual,
@@ -17,18 +17,19 @@ jest.mock('../../src/utils', () => {
   };
 });
 
-import { verifyAccessToken } from '../../src/utils';
+import { verifyAccessToken } from "../../src/utils";
 
-const { authMiddleware } = require('../../src/middleware/authMiddleware') as {
-  authMiddleware: typeof import('../../src/middleware/authMiddleware').authMiddleware;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { authMiddleware } = require("../../src/middleware/authMiddleware") as {
+  authMiddleware: typeof import("../../src/middleware/authMiddleware").authMiddleware;
 };
 
-describe('authMiddleware', () => {
+describe("authMiddleware", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('agrega el usuario al request cuando el token es válido', async () => {
+  it("agrega el usuario al request cuando el token es válido", async () => {
     const next = buildMockNext();
     const res = buildMockResponse();
     const user = sampleUser();
@@ -37,7 +38,7 @@ describe('authMiddleware', () => {
     mockUserRepository.findById.mockResolvedValue(user);
 
     const req = {
-      header: jest.fn().mockReturnValue('Bearer access-token'),
+      header: jest.fn().mockReturnValue("Bearer access-token"),
       user: undefined,
     } as any;
 
@@ -47,7 +48,7 @@ describe('authMiddleware', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it('rechaza cuando falta Authorization', async () => {
+  it("rechaza cuando falta Authorization", async () => {
     const next = buildMockNext();
     const res = buildMockResponse();
     const req = {

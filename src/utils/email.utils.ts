@@ -20,7 +20,7 @@ function escapeHtml(value: string) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
@@ -141,7 +141,7 @@ export class EmailService {
 
   async sendClientStatusChanged(
     client: Client,
-    previousStatus: string,
+    previousStatus: string
   ): Promise<void> {
     const subject = `Estado del cliente actualizado: ${client.fullName}`;
     const text = `El estado del cliente ${client.fullName} (ID: ${client.id}) cambió de ${previousStatus} a ${client.status}.`;

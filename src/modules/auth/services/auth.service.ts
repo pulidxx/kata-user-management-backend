@@ -1,4 +1,4 @@
-import { User, UserRole } from "../../../entities";
+import { User } from "../../../entities";
 import { UserRepository } from "../../users/repositories/user.repository";
 import { RefreshTokenRepository } from "../repositories/refresh-token.repository";
 import {
@@ -12,7 +12,6 @@ import {
   comparePassword,
   generateTokenPair,
   errors,
-  AppError,
 } from "../../../utils";
 
 export class AuthService {
@@ -69,7 +68,7 @@ export class AuthService {
         userId: user.id,
         email: user.email,
         role: user.role,
-      },
+      }
     );
 
     await this.refreshTokenRepository.create({
@@ -86,7 +85,7 @@ export class AuthService {
   }
 
   async refreshTokens(
-    refreshToken: string,
+    refreshToken: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const tokenRecord =
       await this.refreshTokenRepository.findByToken(refreshToken);
