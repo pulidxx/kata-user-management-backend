@@ -1,4 +1,4 @@
-resource "aws_apigatewayv2_api" "main" {
+resource "aws_apigatewayv2_api" "http_api" {
   name          = "${var.project_name}-api"
   protocol_type = "HTTP"
 
@@ -11,35 +11,38 @@ resource "aws_apigatewayv2_api" "main" {
   }
 
   tags = {
-    Name = "${var.project_name}-api"
+    Name        = "${var.project_name}-api"
+    Type        = "HTTP API"
+    Environment = "production"
   }
 }
 
-resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.main.id
+resource "aws_apigatewayv2_stage" "api_default_stage" {
+  api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
 
   tags = {
-    Name = "${var.project_name}-api-stage"
+    Name        = "${var.project_name}-api-stage"
+    Environment = "production"
   }
 }
 
-resource "aws_apigatewayv2_integration" "api" {
-  api_id                 = aws_apigatewayv2_api.main.id
+resource "aws_apigatewayv2_integration" "lambda_integration" {
+  api_id                 = aws_apigatewayv2_api.http_api.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.api.invoke_arn
+  integration_uri        = aws_lambda_function.backend_function.invoke_arn
   payload_format_version = "2.0"
 }
 
-resource "aws_apigatewayv2_route" "api_catch_all" {
-  api_id    = aws_apigatewayv2_api.main.id
+resource "aws_apigatewayv2_route" "proxy_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "ANY /api/v1/{proxy+}"
-  target    = "integrations/${aws_apigatewayv2_integration.api.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
-resource "aws_apigatewayv2_route" "health" {
-  api_id    = aws_apigatewayv2_api.main.id
+resource "aws_apigatewayv2_route" "health_check_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "GET /api/v1/health"
-  target    = "integrations/${aws_apigatewayv2_integration.api.id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
