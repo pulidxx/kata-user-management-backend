@@ -1,0 +1,13 @@
+deploy/
+test/
+.env.example
+.env
+*.tf
+*.tfvars
+*.tfstate*
+jest.config.js
+tsconfig.build.json
+README.md
+.git/
+.gitignore
+.terraform/
