@@ -9,9 +9,8 @@
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "start": "node dist/server.js",
-    "build": "tsc -p tsconfig.build.json",
-    "vercel-build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/server.js",
+    "build": "tsc",
     "dev": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
