@@ -1,6 +1,7 @@
-// Replace the pg driver with Neon's serverless driver (WebSocket/HTTP, not raw TCP).
-// MUST happen before any TypeORM/DataSource import.
 const { Pool, Client, neonConfig } = require("@neondatabase/serverless");
+const ws = require("ws");
+
+neonConfig.webSocketConstructor = ws;
 neonConfig.fetchConnectionCache = true;
 
 const pg = require("pg");
