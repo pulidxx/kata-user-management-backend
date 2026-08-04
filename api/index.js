@@ -1,20 +1,14 @@
-const { Pool, Client, neonConfig } = require("@neondatabase/serverless");
-const ws = require("ws");
-
-neonConfig.webSocketConstructor = ws;
-neonConfig.fetchConnectionCache = true;
-
-const pg = require("pg");
-pg.Pool = Pool;
-pg.Client = Client;
-
 require("reflect-metadata");
 
 const { app } = require("../dist/app");
 const { AppDataSource } = require("../dist/ormconfig");
 
 AppDataSource.initialize()
-  .then(() => console.log("Database connected (Vercel)"))
-  .catch((err) => console.error("Database connection error:", err));
+  .then(() => console.log("DB CONNECTED OK"))
+  .catch((err) => {
+    console.error("DB CONNECT FAILED:", err?.message || err);
+    if (err?.code) console.error("  code:", err.code);
+    if (err?.stack) console.error("  stack:", err.stack);
+  });
 
 module.exports = app;

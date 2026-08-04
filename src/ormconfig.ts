@@ -27,6 +27,7 @@ function buildDbUrl(): string {
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: buildDbUrl(),
+  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
   synchronize: process.env.DB_SYNC === "true",
   logging:
     process.env.NODE_ENV !== "production"
