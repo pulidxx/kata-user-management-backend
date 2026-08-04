@@ -13,7 +13,7 @@ function buildDbUrl(): string {
   const user = process.env.DB_USERNAME;
   const pass = process.env.DB_PASSWORD;
   const name = process.env.DB_NAME;
-  const sslMode = process.env.DB_SSL === "true" ? "require" : "disable";
+  const sslMode = process.env.DB_SSL === "true" ? "verify-full" : "disable";
 
   if (!host || !user || !pass || !name) {
     throw new Error(
@@ -29,11 +29,13 @@ export const AppDataSource = new DataSource({
   url: buildDbUrl(),
   ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
   synchronize: process.env.DB_SYNC === "true",
-  logging:
-    process.env.NODE_ENV !== "production"
-      ? ["error", "warn", "migration"]
-      : false,
+  logging: ["error", "warn", "query"],
   entities: [User, Client, RefreshToken],
   migrations: ["src/migrations/**/*.ts"],
   subscribers: ["src/subscribers/**/*.ts"],
+  extra: {
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    max: 5,
+  },
 });
