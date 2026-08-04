@@ -3,7 +3,7 @@ name: Production Pipeline
 on:
   push:
     branches:
-      - main
+      - qa
 
 jobs:
   quality:
