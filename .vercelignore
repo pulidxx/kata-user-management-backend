@@ -6,7 +6,6 @@ test/
 *.tfvars
 *.tfstate*
 jest.config.js
-tsconfig.build.json
 README.md
 .git/
 .gitignore
