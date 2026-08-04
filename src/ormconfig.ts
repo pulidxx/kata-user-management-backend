@@ -4,29 +4,29 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const requiredEnvVars = [
-  "DB_HOST",
-  "DB_PORT",
-  "DB_USERNAME",
-  "DB_PASSWORD",
-  "DB_NAME",
-];
+function buildDbUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (url) return url;
 
-requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`);
+  const host = process.env.DB_HOST;
+  const port = process.env.DB_PORT || "5432";
+  const user = process.env.DB_USERNAME;
+  const pass = process.env.DB_PASSWORD;
+  const name = process.env.DB_NAME;
+  const sslMode = process.env.DB_SSL === "true" ? "require" : "disable";
+
+  if (!host || !user || !pass || !name) {
+    throw new Error(
+      "Missing database environment variables. Set DATABASE_URL or DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME."
+    );
   }
-});
+
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${host}:${port}/${name}?sslmode=${sslMode}`;
+}
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl:
-    process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
+  url: buildDbUrl(),
   synchronize: process.env.DB_SYNC === "true",
   logging:
     process.env.NODE_ENV !== "production"
